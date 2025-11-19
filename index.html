@@ -24,6 +24,17 @@
   .rec-bad { background-color:#fdecea; color:#dc3545; }
   .rec-icon { margin-right:10px; font-weight:bold; }
   #verifiedBadge { display:none; margin-top:20px; text-align:center; font-size:18px; font-weight:bold; color:#1a73e8; background:#e8f0fe; padding:12px 15px; border-radius:10px; box-shadow:0 3px 10px rgba(0,0,0,0.1); animation: pop 0.4s ease-out; }
+  #blockedPages {
+  background: #f1f3f4;
+  padding: 12px;
+  border-radius: 6px;
+  flex:1;
+  margin:0;
+  max-height: 150px; /* fixed height */
+  overflow-y: auto;   /* vertical scroll if content exceeds */
+  white-space: pre-wrap; /* wrap long lines */
+}
+
   @keyframes pop { 0% { transform:scale(0.7); opacity:0; } 100% { transform:scale(1); opacity:1; } }
 </style>
 </head>
@@ -40,8 +51,6 @@
       <div id="verifiedBadge"><i class="fas fa-check-circle"></i> Wix Verified Fix Applied</div>
 
       <div class="section"><span class="label">Website URL:</span> <span id="websiteUrl"></span></div>
-      <div class="section"><span class="label">Website IP:</span> <span id="websiteIP">Fetching...</span></div>
-      <div class="section"><span class="label">Website Country:</span> <span id="websiteCountry">Fetching...</span></div>
       <div class="section"><span class="label">Robots.txt Status:</span> <span id="robotsExists" class="badge red">Attention</span></div>
       <div class="section"><span class="label">Blocked Pages:</span> <pre id="blockedPages"></pre></div>
       <div class="section"><span class="label">Sitemap Present:</span> <span id="sitemapPresent" class="badge"></span></div>
@@ -59,32 +68,10 @@
 <footer>© 2025 Wix Site Audit Tool</footer>
 
 <script>
-// Get website IP + country via free API
-async function getWebsiteLocation(url) {
-  try {
-    const hostname = new URL(url).hostname;
-    const res = await fetch(`https://api.allorigins.win/raw?url=http://ip-api.com/json/${hostname}`);
-    const data = await res.json();
-    return {
-      ip: data.query,
-      country: data.country,
-      region: data.regionName,
-      city: data.city
-    };
-  } catch(e) {
-    return { ip:"Unknown", country:"Unknown", region:"Unknown", city:"Unknown" };
-  }
-}
-
 async function generateReport() {
   const urlInput = document.getElementById("urlInput").value.trim();
   if(!urlInput) { alert("Enter a website URL"); return; }
   document.getElementById("websiteUrl").innerText = urlInput;
-
-  // Fetch website IP & country
-  const siteInfo = await getWebsiteLocation(urlInput);
-  document.getElementById("websiteIP").innerText = siteInfo.ip;
-  document.getElementById("websiteCountry").innerText = siteInfo.country;
 
   // Fetch robots.txt
   const robotsUrl = urlInput.replace(/\/$/,"") + "/robots.txt";
