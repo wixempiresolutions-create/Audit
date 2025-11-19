@@ -106,8 +106,8 @@ async function generateReport() {
   const recommendationsDiv = document.getElementById("recommendations");
   recommendationsDiv.innerHTML = "";
   const recs = [
-    { text: "Update robots.txt to improve SEO ranking.", good:false },
-    { text: sitemap === "Yes" ? "Sitemap is present." : "Add sitemap link for better visibility.", good: sitemap==="Yes" },
+    { text: "robots.txt need improvement for SEO ranking.", good:false },
+    { text: sitemap === "Yes" ? "Sitemap is present." : "sitemap not found.", good: sitemap==="Yes" },
     { text: blocked.length ? "Review blocked pages to ensure important pages are not disallowed." : "No critical pages blocked.", good: blocked.length===0 }
   ];
   recs.forEach(rec => {
@@ -147,3 +147,4 @@ function applyFixMode() {
 
 </body>
 </html>
+
