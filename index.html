@@ -82,7 +82,7 @@ async function generateReport() {
   } catch(e) {}
 
   const robotsBadge = document.getElementById("robotsExists");
-  robotsBadge.innerText = "Attention";
+  robotsBadge.innerText = "Critical";
   robotsBadge.className = "badge red";
 
   let blocked = [];
@@ -147,6 +147,7 @@ function applyFixMode() {
 
 </body>
 </html>
+
 
 
 
